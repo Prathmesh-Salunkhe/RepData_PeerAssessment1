@@ -7,26 +7,37 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r}
+
+```r
 setwd('F:\\R\\datasciencecoursera\\RepData_PeerAssessment1')
 df<-read.csv('activity/activity.csv',header=TRUE)
 df[['date']]<- as.Date(df[['date']])
 ```
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 perday<-aggregate(steps~date,data=df,sum)
 
 hist(perday[['steps']], breaks = length(perday[['date']]), angle = 45, col ="blue",xlab = "Steps per day",main = "Total number of steps taken each day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
 Mean and Median steps
-```{r}
+
+```r
 summary(perday$steps)[3:4]
 ```
 
+```
+##   Median     Mean 
+## 10765.00 10766.19
+```
+
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 meaninterval <- aggregate(steps ~ interval, data = df, FUN=mean, na.rm=TRUE)
 
 with( meaninterval, plot(x = interval, y = steps, type ="l", col = "blue",
@@ -34,26 +45,40 @@ with( meaninterval, plot(x = interval, y = steps, type ="l", col = "blue",
                           xlab = "Interval",
                           ylab = "Number of steps taken"))
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps
-```{r}
+
+```r
 max= meaninterval[which.max(meaninterval$steps),]
 print(max)
 ```
+
+```
+##     interval    steps
+## 104      835 206.1698
+```
 ## Imputing missing values
-```{r}
+
+```r
 summary(df$steps)[7]
 ```
+
+```
+## NA's 
+## 2304
+```
 Replacing NA with mean
-```{r}
+
+```r
 imputedSteps <- df
 mean<-mean(imputedSteps$steps,na.rm = TRUE)
 imputedSteps[which(is.na(imputedSteps$steps)), "steps"] <- mean
-
 ```
 
 Plotting Imputed dataframe
-```{r}
 
+```r
 daySteps2 <- aggregate(steps ~ date, data = imputedSteps, FUN=sum)
 
 hist(daySteps2$steps, breaks = length(daySteps2$date), angle = 45, col = "blue",
@@ -62,15 +87,23 @@ hist(daySteps2$steps, breaks = length(daySteps2$date), angle = 45, col = "blue",
 rug(daySteps2$steps)
 ```
 
-Mean and Median of Imputed steps
-```{r}
-summary(daySteps2$steps)[3:4]
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
+Mean and Median of Imputed dataframe
+
+```r
+summary(daySteps2$steps)[3:4]
+```
+
+```
+##   Median     Mean 
+## 10766.19 10766.19
 ```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+
+```r
 imputedSteps$daytype <- NULL
 
 for(i in 1:nrow(imputedSteps)){
@@ -85,8 +118,11 @@ for(i in 1:nrow(imputedSteps)){
 imputedSteps$daytype <- as.factor(imputedSteps$daytype)
 ```
 
-```{r}
-daytypeStepsInterval <- aggregate(imputedSteps$steps,by = list(interval = imputedSteps$interval,  daytype=imputedSteps$daytype),FUN=mean)
+
+```r
+daytypeStepsInterval <- aggregate(imputedSteps$steps, 
+                                  by = list(interval = imputedSteps$interval,                                                                daytype =imputedSteps$daytype),
+                                  FUN=mean)
 
 library(ggplot2)
 
@@ -95,3 +131,5 @@ ggplot(daytypeStepsInterval, aes(x=interval, y=x)) +
         facet_wrap(~ daytype, nrow=2, ncol=1) +
         labs(x="5 min. Interval", y="Number of steps")  + theme_bw()
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
